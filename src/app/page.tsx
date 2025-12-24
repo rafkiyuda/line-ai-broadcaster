@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Calendar, Clock, Repeat, Users, MessageSquare, Loader2, CheckCircle, AlertCircle, History } from "lucide-react";
+import { Send, Calendar, Clock, Repeat, Users, MessageSquare, Loader2, CheckCircle, AlertCircle, History, Sparkles, Zap } from "lucide-react";
 import { format } from "date-fns";
 
 type Schedule = {
@@ -19,6 +19,8 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [recurrence, setRecurrence] = useState("ONCE");
+  const [tone, setTone] = useState("Professional");
+  const [isAiLoading, setIsAiLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [feedback, setFeedback] = useState("");
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -40,6 +42,45 @@ export default function Home() {
       console.error("Failed to fetch schedules", error);
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const handleParaphrase = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!message) {
+      setFeedback("Please type a message first to paraphrase.");
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 2000);
+      return;
+    }
+
+    setIsAiLoading(true);
+    setFeedback("");
+
+    try {
+      const res = await fetch("/api/paraphrase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: message, tone }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.paraphrased) {
+        setMessage(data.paraphrased);
+        setFeedback("Message rewritten by AI! ✨");
+        setStatus("success");
+      } else {
+        setFeedback("Failed to paraphrase.");
+        setStatus("error");
+      }
+    } catch (error) {
+      console.error(error);
+      setFeedback("AI Service Error");
+      setStatus("error");
+    } finally {
+      setIsAiLoading(false);
+      setTimeout(() => setStatus("idle"), 3000);
     }
   };
 
@@ -146,166 +187,206 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans p-6 md:p-12">
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="min-h-screen relative bg-slate-50 text-slate-800 font-sans p-6 md:p-12 overflow-hidden selection:bg-teal-200">
 
-        {/* LEFT COLUMN: FORM */}
-        <section className="flex flex-col gap-6">
-          <header>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-              <span className="bg-blue-600 text-white p-2 rounded-lg"><Send size={24} /></span>
-              Line Blaster
+      {/* BACKGROUND BLOBS */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-teal-300/30 rounded-full blur-[100px] animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-300/30 rounded-full blur-[100px] animate-pulse delay-1000" />
+      <div className="absolute top-[40%] left-[80%] w-[20%] h-[20%] bg-indigo-300/20 rounded-full blur-[80px]" />
+
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
+
+        {/* LEFT COLUMN: FORM (7/12 width on large screens) */}
+        <section className="lg:col-span-7 flex flex-col gap-6">
+          <header className="mb-2">
+            <h1 className="text-4xl font-black tracking-tight text-slate-900 flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-teal-400 blur-lg opacity-40 rounded-full"></div>
+                <span className="relative bg-gradient-to-br from-teal-500 to-cyan-600 text-white p-3 rounded-2xl shadow-xl shadow-teal-200/50"><Zap size={28} fill="currentColor" /></span>
+              </div>
+              <span>Line<span className="text-teal-600">Blaster</span></span>
             </h1>
-            <p className="text-slate-500 mt-2">Schedule your broadcasts easily.</p>
+            <p className="text-slate-500 mt-3 font-medium text-lg ml-1">Broadcast messages with precision & style.</p>
           </header>
 
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-            <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600">
-              <h2 className="text-white font-bold text-lg flex items-center gap-2">
-                <Calendar size={20} /> New Schedule
+          <div className="bg-white/70 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-white/60 overflow-hidden ring-1 ring-white/60 transition-all">
+            <div className="p-8 bg-gradient-to-br from-white/50 to-white/10 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 to-cyan-500/10" />
+              <h2 className="relative z-10 text-teal-900 font-bold text-xl flex items-center gap-3">
+                <span className="bg-white/80 p-2 rounded-lg shadow-sm text-teal-600"><Calendar size={20} /></span>
+                New Broadcast
               </h2>
             </div>
 
-            <form className="p-6 flex flex-col gap-5">
+            <form className="p-8 pt-6 flex flex-col gap-7">
 
               {/* Target ID */}
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <Users size={16} /> Target ID (Group/User)
+              <div className="group">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2 mb-2 group-focus-within:text-teal-600 transition-colors ml-1">
+                  Target ID
                 </label>
-                <input
-                  type="text"
-                  value={targetId}
-                  onChange={(e) => setTargetId(e.target.value)}
-                  placeholder="Cxxxxxxxx..."
-                  required
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all placeholder:text-slate-400 font-mono text-sm"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={targetId}
+                    onChange={(e) => setTargetId(e.target.value)}
+                    placeholder="Cxxxxxxxx..."
+                    required
+                    className="w-full pl-5 pr-4 py-4 bg-slate-50/50 border border-slate-200/60 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-400 focus:bg-white focus:outline-none transition-all placeholder:text-slate-400 font-mono text-sm shadow-sm backdrop-blur-sm"
+                  />
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-teal-500 transition-colors">
+                    <Users size={18} />
+                  </div>
+                </div>
               </div>
 
               {/* Message */}
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <MessageSquare size={16} /> Message
+              <div className="group">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2 mb-2 group-focus-within:text-teal-600 transition-colors ml-1">
+                  Message Content
                 </label>
-                <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type your broadcast message..."
-                  required
-                  rows={4}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all placeholder:text-slate-400"
-                />
+                <div className="relative">
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Type your broadcast message here..."
+                    required
+                    rows={4}
+                    className="w-full pl-5 pr-4 py-4 bg-slate-50/50 border border-slate-200/60 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-400 focus:bg-white focus:outline-none transition-all placeholder:text-slate-400 shadow-sm resize-none backdrop-blur-sm"
+                  />
+                  <div className="absolute right-4 top-4 text-slate-300 group-focus-within:text-teal-500 transition-colors">
+                    <MessageSquare size={18} />
+                  </div>
+                </div>
               </div>
 
               {/* Date & Time */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <Clock size={16} /> Schedule Time
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="group">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2 mb-2 group-focus-within:text-teal-600 transition-colors ml-1">
+                    Schedule
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={scheduledAt}
-                    onChange={(e) => setScheduledAt(e.target.value)}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-                  />
+                  <div className="relative">
+                    <input
+                      type="datetime-local"
+                      value={scheduledAt}
+                      onChange={(e) => setScheduledAt(e.target.value)}
+                      className="w-full pl-5 pr-4 py-4 bg-slate-50/50 border border-slate-200/60 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-400 focus:bg-white focus:outline-none text-sm shadow-sm text-slate-600 backdrop-blur-sm"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <Repeat size={16} /> Recurrence
+                <div className="group">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2 mb-2 group-focus-within:text-teal-600 transition-colors ml-1">
+                    Recurrence
                   </label>
-                  <select
-                    value={recurrence}
-                    onChange={(e) => setRecurrence(e.target.value)}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-                  >
-                    <option value="ONCE">Once</option>
-                    <option value="DAILY">Daily</option>
-                    <option value="WEEKLY">Weekly</option>
-                    <option value="MONTHLY">Monthly</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={recurrence}
+                      onChange={(e) => setRecurrence(e.target.value)}
+                      className="w-full pl-5 pr-10 py-4 bg-slate-50/50 border border-slate-200/60 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-400 focus:bg-white focus:outline-none text-sm shadow-sm appearance-none backdrop-blur-sm"
+                    >
+                      <option value="ONCE">Once</option>
+                      <option value="DAILY">Daily</option>
+                      <option value="WEEKLY">Weekly</option>
+                      <option value="MONTHLY">Monthly</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <Repeat size={18} />
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-3 mt-2">
+              <div className="grid grid-cols-2 gap-4 mt-2">
                 <button
                   onClick={handleSubmit}
                   disabled={status === "loading"}
-                  className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                  className="group relative bg-teal-600 hover:bg-teal-500 text-white font-bold py-4 px-6 rounded-2xl shadow-xl shadow-teal-500/20 transition-all active:scale-[0.98] overflow-hidden"
                 >
-                  {status === "loading" ? <Loader2 className="animate-spin" /> : <><Calendar size={18} /> Schedule</>}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+                  <span className="flex items-center justify-center gap-2 text-lg">
+                    {status === "loading" ? <Loader2 className="animate-spin" /> : <><Calendar size={20} /> Schedule</>}
+                  </span>
                 </button>
 
                 <button
                   onClick={handleSendNow}
                   disabled={status === "loading"}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
+                  className="bg-white hover:bg-slate-50 text-teal-600 font-bold py-4 px-6 rounded-2xl shadow-xl shadow-slate-200/50 transition-all flex items-center justify-center gap-2 active:scale-[0.98] border border-slate-100"
                 >
-                  {status === "loading" ? <Loader2 className="animate-spin" /> : <><Send size={18} /> Send Now</>}
+                  {status === "loading" ? <Loader2 className="animate-spin" /> : <><Send size={20} /> Send Now</>}
                 </button>
               </div>
 
               <button
                 onClick={handleRunCron}
                 disabled={status === "loading"}
-                className="w-full mt-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 px-4 rounded-lg text-sm transition-all flex items-center justify-center gap-2"
+                className="w-full mt-2 text-slate-400 hover:text-teal-600 font-medium py-2 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-2 group"
               >
-                <Clock size={16} /> Force Run Scheduler (Dev Mode)
+                <Clock size={14} className="group-hover:animate-spin" /> Force Trigger Scheduler (Dev Only)
               </button>
 
               {/* Feedback */}
               {status === "success" && (
-                <div className="p-3 bg-green-50 text-green-700 text-sm rounded-lg flex items-center gap-2 border border-green-100">
-                  <CheckCircle size={16} /> {feedback}
+                <div className="p-4 bg-teal-50/80 backdrop-blur-sm text-teal-800 text-sm font-medium rounded-2xl flex items-center gap-3 border border-teal-100 shadow-sm animate-in fade-in slide-in-from-top-2">
+                  <span className="bg-teal-100 p-1.5 rounded-full"><CheckCircle size={18} className="text-teal-600" /></span> {feedback}
                 </div>
               )}
               {status === "error" && (
-                <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg flex items-center gap-2 border border-red-100">
-                  <AlertCircle size={16} /> {feedback}
+                <div className="p-4 bg-red-50/80 backdrop-blur-sm text-red-800 text-sm font-medium rounded-2xl flex items-center gap-3 border border-red-100 shadow-sm animate-in fade-in slide-in-from-top-2">
+                  <span className="bg-red-100 p-1.5 rounded-full"><AlertCircle size={18} className="text-red-600" /></span> {feedback}
                 </div>
               )}
             </form>
           </div>
         </section>
 
-        {/* RIGHT COLUMN: HISTORY */}
-        <section className="flex flex-col gap-6">
-          <header className="md:mt-0 mt-8">
-            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-              <History size={24} className="text-indigo-600" /> History & Schedules
+        {/* RIGHT COLUMN: HISTORY (5/12 width) */}
+        <section className="lg:col-span-5 flex flex-col gap-6">
+          <header className="md:mt-0 mt-8 mb-2 flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+              <span className="bg-white p-2 rounded-xl shadow-sm text-teal-500"><History size={24} /></span> History
             </h2>
-            <p className="text-slate-500 text-sm">Active schedules and sent messages.</p>
+            <div className="text-xs font-bold bg-slate-100 px-3 py-1.5 rounded-full text-slate-500">Live Updates</div>
           </header>
 
-          <div className="flex-1 overflow-auto space-y-4 max-h-[600px] pr-2">
+          <div className="flex-1 overflow-auto space-y-4 max-h-[800px] pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent pb-10">
             {loadingData ? (
-              <div className="flex items-center justify-center py-12 text-slate-400">
-                <Loader2 className="animate-spin" size={32} />
+              <div className="flex flex-col items-center justify-center py-20 text-slate-400/50 gap-4">
+                <Loader2 className="animate-spin" size={40} />
+                <p className="text-sm font-medium">Loading schedules...</p>
               </div>
             ) : schedules.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
-                <p className="text-slate-400">No schedules found.</p>
+              <div className="text-center py-20 bg-white/40 backdrop-blur-sm rounded-[2rem] border-2 border-dashed border-slate-200">
+                <div className="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-teal-300 shadow-md">
+                  <Sparkles size={32} />
+                </div>
+                <h3 className="text-slate-800 font-bold text-lg mb-1">No broadcasts yet</h3>
+                <p className="text-slate-400 text-sm">Create your first message to see it here.</p>
               </div>
             ) : (
               schedules.map((item) => (
-                <div key={item.id} className={`group relative p-5 bg-white rounded-xl border transition-all hover:shadow-md ${item.active ? 'border-l-4 border-l-blue-500 border-slate-200' : 'border-l-4 border-l-slate-300 border-slate-100 opacity-75'}`}>
-                  <div className="flex justify-between items-start mb-2">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider py-1 px-2 rounded-full ${item.active ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
+                <div key={item.id} className={`group relative p-6 bg-white/70 backdrop-blur-md rounded-[1.5rem] border transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-teal-500/5 ${item.active ? 'border-teal-200 shadow-md' : 'border-slate-100 opacity-60 hover:opacity-100'}`}>
+                  <div className="flex justify-between items-start mb-3">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider py-1.5 px-3 rounded-full ${item.active ? 'bg-teal-100 text-teal-700' : 'bg-slate-100 text-slate-500'}`}>
                       {item.active ? item.recurrence : 'SENT'}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">
-                      {format(new Date(item.scheduledAt), "MMM d, HH:mm")}
+                    <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md">
+                      <Clock size={12} /> {format(new Date(item.scheduledAt), "MMM d, HH:mm")}
                     </span>
                   </div>
-                  <h3 className="font-semibold text-slate-800 line-clamp-1 mb-1" title={item.targetId}>Target: {item.targetId}</h3>
-                  <p className="text-slate-600 text-sm line-clamp-2">{item.message}</p>
+                  <h3 className="font-bold text-slate-800 line-clamp-1 mb-2 text-sm flex items-center gap-2">
+                    <Users size={14} className="text-teal-500" /> {item.targetId}
+                  </h3>
+                  <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100/50">
+                    <p className="text-slate-600 text-sm line-clamp-2 leading-relaxed">{item.message}</p>
+                  </div>
 
                   {!item.active && (
-                    <div className="absolute top-4 right-4 text-green-500">
-                      <CheckCircle size={20} />
+                    <div className="absolute top-6 right-6 text-teal-500/20 group-hover:text-teal-500 transition-colors">
+                      <CheckCircle size={24} />
                     </div>
                   )}
                 </div>
