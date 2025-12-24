@@ -71,10 +71,20 @@ export async function GET(request: Request) {
 async function sendMessage(to: string, text: string): Promise<{ success: boolean; error?: any }> {
     const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 
+    // DEBUG TOKEN
+    if (channelAccessToken) {
+        console.log(`[Cron] Token Length: ${channelAccessToken.length}`);
+        console.log(`[Cron] Token Start: ${channelAccessToken.substring(0, 5)}...`);
+    } else {
+        console.error('[Cron] Token is undefined!');
+    }
+
     if (!channelAccessToken) {
         console.error('LINE_CHANNEL_ACCESS_TOKEN is missing');
         return { success: false, error: 'Missing Access Token' };
     }
+
+    const debugToken = `${channelAccessToken.substring(0, 5)}... (Len: ${channelAccessToken.length})`;
 
     try {
         const response = await fetch('https://api.line.me/v2/bot/message/push', {
@@ -92,7 +102,7 @@ async function sendMessage(to: string, text: string): Promise<{ success: boolean
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             console.error('LINE API Error:', errorData);
-            return { success: false, error: errorData };
+            return { success: false, error: { ...errorData, debugToken } };
         }
 
         return { success: true };
