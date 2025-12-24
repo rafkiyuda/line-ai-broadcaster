@@ -240,11 +240,35 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Message */}
+              {/* Message with AI Controls */}
               <div className="group">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2 mb-2 group-focus-within:text-teal-600 transition-colors ml-1">
-                  Message Content
-                </label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2 group-focus-within:text-teal-600 transition-colors ml-1">
+                    Message Content
+                  </label>
+                  <div className="flex gap-2 items-center">
+                    <select
+                      value={tone}
+                      onChange={(e) => setTone(e.target.value)}
+                      className="bg-slate-100 border-none text-xs rounded-lg px-2 py-1 text-slate-600 focus:ring-2 focus:ring-teal-400 cursor-pointer outline-none"
+                      disabled={isAiLoading}
+                    >
+                      <option value="Professional">Professional</option>
+                      <option value="Fun">Fun & Casual</option>
+                      <option value="Marketing">Marketing / Hype</option>
+                      <option value="Empathetic">Empathetic</option>
+                    </select>
+                    <button
+                      onClick={handleParaphrase}
+                      disabled={isAiLoading || !message}
+                      className="text-xs flex items-center gap-1 bg-gradient-to-r from-teal-400 to-cyan-500 text-white px-2 py-1 rounded-lg hover:shadow-lg transition-all active:scale-95 disabled:opacity-50"
+                      title="Rewrite with Gemini AI"
+                    >
+                      {isAiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                      Rewrite
+                    </button>
+                  </div>
+                </div>
                 <div className="relative">
                   <textarea
                     value={message}
