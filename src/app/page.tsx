@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Calendar, Clock, Repeat, Users, MessageSquare, Loader2, CheckCircle, AlertCircle, History, Sparkles, Zap } from "lucide-react";
+import { Send, Calendar, Clock, Repeat, Users, MessageSquare, Loader2, CheckCircle, AlertCircle, History, Sparkles, Zap, X } from "lucide-react";
 import { format } from "date-fns";
 
 type Schedule = {
@@ -21,6 +21,8 @@ export default function Home() {
   const [recurrence, setRecurrence] = useState("ONCE");
   const [tone, setTone] = useState("Professional");
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [feedback, setFeedback] = useState("");
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -67,8 +69,9 @@ export default function Home() {
       const data = await res.json();
 
       if (res.ok && data.paraphrased) {
-        setMessage(data.paraphrased);
-        setFeedback("Message rewritten by AI! ✨");
+        setAiSuggestion(data.paraphrased);
+        setShowAiModal(true);
+        setFeedback("Review the AI suggestion!");
         setStatus("success");
       } else {
         setFeedback("Failed to paraphrase.");
@@ -184,6 +187,12 @@ export default function Home() {
       setStatus("error");
       setFeedback("Scheduler error");
     }
+  };
+
+  const handleApplyAi = () => {
+    setMessage(aiSuggestion);
+    setShowAiModal(false);
+    setFeedback("AI suggestion applied! ✨");
   };
 
   return (
@@ -419,6 +428,51 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      {/* AI REVIEW MODAL */}
+      {showAiModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 ring-1 ring-white/50">
+            <div className="p-6 bg-gradient-to-r from-teal-500 to-cyan-600 flex justify-between items-center text-white">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Sparkles size={20} className="text-yellow-300" /> Review AI Suggestion
+              </h3>
+              <button onClick={() => setShowAiModal(false)} className="hover:bg-white/20 p-1 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 flex flex-col gap-4">
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-500">
+                Tone: <span className="font-bold text-teal-600 uppercase">{tone}</span>
+              </div>
+
+              <textarea
+                value={aiSuggestion}
+                onChange={(e) => setAiSuggestion(e.target.value)}
+                rows={6}
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-teal-400 focus:outline-none transition-all resize-none text-slate-700 leading-relaxed shadow-inner"
+              />
+
+              <div className="flex gap-3 justify-end mt-2">
+                <button
+                  onClick={() => setShowAiModal(false)}
+                  className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleApplyAi}
+                  className="px-6 py-2.5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-600 hover:shadow-lg hover:shadow-teal-500/20 active:scale-95 transition-all flex items-center gap-2"
+                >
+                  <CheckCircle size={18} /> Apply Change
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
