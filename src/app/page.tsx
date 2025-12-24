@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Calendar, Clock, Repeat, Users, MessageSquare, Loader2, CheckCircle, AlertCircle, History, Sparkles, Zap, X } from "lucide-react";
+import { Send, Calendar, Clock, Repeat, Users, MessageSquare, Loader2, CheckCircle, AlertCircle, History, Sparkles, Zap, X, Info, Copy, ExternalLink, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 
 type Schedule = {

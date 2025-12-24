@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LineBlasting (AI LINE Broadcaster) 🚀
 
-## Getting Started
+A modern, AI-powered message broadcasting tool for LINE groups.
+Built with **Next.js**, **Supabase**, **Prisma**, and **Google Gemini AI**.
 
-First, run the development server:
+![Project Screenshot](https://via.placeholder.com/800x400?text=LineBlasting+UI+Preview)
+
+## ✨ Features
+
+- **AI Paraphrasing**: Rewrite messages instantly using Gemini 2.5 Flash with different tones (Professional, Fun, Marketing, Empathetic).
+- **Split View UI**: Compare your original draft with the AI suggestion side-by-side.
+- **Smart Scheduling**: Schedule messages for the future (One-time, Daily, Weekly, Monthly).
+  - *Note: Automated cron jobs require a pro hosting setup.*
+- **Instant Send**: Broadcast messages immediately to your target group.
+- **History Tracking**: Keep a log of all sent and scheduled messages.
+- **Modern UI**: "Salted Egg Blue" theme with Glassmorphism and animated backgrounds.
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Database**: Supabase (PostgreSQL)
+- **ORM**: Prisma
+- **AI**: Google Gemini API (`gemini-2.5-flash`)
+- **Styling**: Tailwind CSS + Shadcn Concepts
+- **Icons**: Lucide React
+
+## 🚀 Quick Start Guide
+
+### 1. Prerequisites
+- Node.js & npm installed.
+- A LINE Official Account (Messaging API channel).
+- A Supabase project.
+- A Google Gemini API Key.
+
+### 2. Environment Variables
+Create a `.env.local` file in the root directory:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Database
+DATABASE_URL="postgres://user:password@host:port/postgres?pgbouncer=true"
+DIRECT_URL="postgres://user:password@host:port/postgres"
+
+# LINE Messaging API
+LINE_CHANNEL_ACCESS_TOKEN="your_long_lived_access_token"
+LINE_CHANNEL_SECRET="your_channel_secret"
+
+# Gemini AI
+GEMINI_API_KEY="your_gemini_api_key"
+
+# App
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Usage & Testing
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+#### 🔗 Join the Test Group
+To test this bot, you must be in the specific Allowed Group.
+[**Join Here via LINE**](https://line.me/R/ti/g/KGfbjk5j77)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+#### 🎯 Target ID
+Use this Group ID for all your tests:
+```
+Ca6096c7ef8d43b7d9fc142fa479d2518
+```
 
-## Learn More
+#### ✍️ AI Paraphrasing
+1. Type a draft message.
+2. Select a Tone (e.g., "Fun").
+3. Click **Rewrite**.
+4. View the result in the box below and click **"Use This"** if you like it.
 
-To learn more about Next.js, take a look at the following resources:
+## ⚠️ Limitations & Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Free Tier Limits**: This project uses free tiers for Vercel, Supabase, and Gemini. Please use sparingly to avoid hitting rate limits.
+- **Scheduler**: The background cron job for valid scheduling is **disabled** on this Vercel deployment due to free tier limitations. Please use the **"Send Now"** feature for immediate results.
+- **Deployment**: If deploying to Vercel, ensure you add all Environment Variables in the Project Settings.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📜 License
+MIT License
