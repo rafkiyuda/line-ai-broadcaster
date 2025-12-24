@@ -21,7 +21,6 @@ export default function Home() {
   const [recurrence, setRecurrence] = useState("ONCE");
   const [tone, setTone] = useState("Professional");
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [showAiModal, setShowAiModal] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [feedback, setFeedback] = useState("");
@@ -70,8 +69,7 @@ export default function Home() {
 
       if (res.ok && data.paraphrased) {
         setAiSuggestion(data.paraphrased);
-        setShowAiModal(true);
-        setFeedback("Review the AI suggestion!");
+        setFeedback("AI suggestion ready below! 👇");
         setStatus("success");
       } else {
         setFeedback("Failed to paraphrase.");
