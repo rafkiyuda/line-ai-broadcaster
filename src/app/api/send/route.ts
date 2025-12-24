@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
     try {
@@ -21,6 +24,7 @@ export async function POST(request: Request) {
             );
         }
 
+        // 1. Send to LINE
         const response = await fetch('https://api.line.me/v2/bot/message/push', {
             method: 'POST',
             headers: {
@@ -41,6 +45,19 @@ export async function POST(request: Request) {
                 { status: response.status }
             );
         }
+
+        // 2. Save to Database (History)
+        // We mark it as active: false because it's already sent (one-time immediate)
+        await prisma.schedule.create({
+            data: {
+                targetId: groupId,
+                message: message,
+                scheduledAt: new Date(),
+                recurrence: 'ONCE',
+                active: false,
+                lastRunAt: new Date(),
+            },
+        });
 
         return NextResponse.json({ success: true });
     } catch (error) {

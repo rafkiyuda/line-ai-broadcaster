@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Schedule {
+  id             String   @id @default(uuid())
+  targetId       String
+  message        String
+  scheduledAt    DateTime
+  recurrence     Recurrence @default(ONCE)
+  cronExpression String?
+  lastRunAt      DateTime?
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum Recurrence {
+  ONCE
+  DAILY
+  WEEKLY
+  MONTHLY
+}
