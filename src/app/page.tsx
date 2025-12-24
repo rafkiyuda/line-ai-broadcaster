@@ -401,7 +401,64 @@ export default function Home() {
 
         {/* RIGHT COLUMN: LISTS (5/12 width) */}
         <section className="lg:col-span-5 flex flex-col gap-6">
-          <header className="md:mt-0 mt-8 mb-2 flex items-center justify-between">
+
+          {/* GUIDE CARD */}
+          <div className="bg-white/80 backdrop-blur-xl p-6 rounded-[2rem] shadow-xl border border-white/50 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-teal-100/50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
+            <h3 className="flex items-center gap-2 font-bold text-slate-800 text-lg mb-4 relative z-10">
+              <Info size={20} className="text-teal-500" /> Quick Start & Notes
+            </h3>
+
+            <div className="space-y-4 text-sm relative z-10">
+              <div className="p-3 bg-teal-50 rounded-xl border border-teal-100/50">
+                <p className="text-teal-800 font-bold mb-1 flex items-center gap-2">
+                  <Users size={14} /> Join Test Group
+                </p>
+                <a
+                  href="https://line.me/R/ti/g/KGfbjk5j77"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-teal-600 underline hover:text-teal-800 flex items-center gap-1"
+                >
+                  Only works here <ExternalLink size={12} />
+                </a>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100/50">
+                <p className="text-slate-700 font-bold mb-2 flex items-center gap-2">
+                  Target ID (Copy this)
+                </p>
+                <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200">
+                  <code className="flex-1 text-xs text-slate-500 font-mono overflow-hidden text-ellipsis">Ca6096c7ef8d43b7d9fc142fa479d2518</code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText("Ca6096c7ef8d43b7d9fc142fa479d2518");
+                      setFeedback("ID Copied! 📋");
+                      setStatus("success");
+                      setTimeout(() => setStatus("idle"), 2000);
+                    }}
+                    className="p-1.5 hover:bg-slate-100 rounded-md text-slate-400 hover:text-teal-500 transition-colors"
+                    title="Copy ID"
+                  >
+                    <Copy size={14} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-3 bg-amber-50 rounded-xl border border-amber-100/50 text-amber-800 text-xs leading-relaxed space-y-2">
+                <p className="flex items-start gap-2">
+                  <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                  <strong>Limits:</strong> Free tier service. Please test sparingly to avoid rate limits.
+                </p>
+                <p className="flex items-start gap-2">
+                  <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                  <strong>Scheduler:</strong> Currently disabled on Vercel Free Tier (requires external cron). Use "Send Now".
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <header className="md:mt-0 mt-2 mb-2 flex items-center justify-between">
             <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
               <span className="bg-white p-2 rounded-xl shadow-sm text-teal-500"><History size={24} /></span>
               Activity
