@@ -9,10 +9,12 @@ export async function POST(request: Request) {
         for (const event of events) {
             if (event.type === 'message' && event.source.type === 'group') {
                 const groupId = event.source.groupId;
-                const replyToken = event.replyToken;
+                // const replyToken = event.replyToken; // Unused now
 
-                // Reply to the group with the Group ID
-                await replyToLine(replyToken, `Your Group ID is: ${groupId}`);
+                // Log Group ID for debugging, but DO NOT reply to avoid spam
+                console.log(`Captured Group ID in Logs: ${groupId}`);
+
+                // await replyToLine(replyToken, `Your Group ID is: ${groupId}`);
             }
         }
 
