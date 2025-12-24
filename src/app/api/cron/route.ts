@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
         for (const schedule of pendingSchedules) {
             // 1. Send the message
-            const success = await sendMessage(schedule.targetId, schedule.message);
+            const { success, error } = await sendMessage(schedule.targetId, schedule.message);
 
             // 2. Handle result and recurrence
             if (success) {
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
                 }
                 results.push({ id: schedule.id, status: 'sent' });
             } else {
-                results.push({ id: schedule.id, status: 'failed' });
+                results.push({ id: schedule.id, status: 'failed', error });
             }
         }
 
@@ -67,9 +67,14 @@ export async function GET(request: Request) {
     }
 }
 
-async function sendMessage(to: string, text: string) {
+// Helper: Send Message with extended error info
+async function sendMessage(to: string, text: string): Promise<{ success: boolean; error?: any }> {
     const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-    if (!channelAccessToken) return false;
+
+    if (!channelAccessToken) {
+        console.error('LINE_CHANNEL_ACCESS_TOKEN is missing');
+        return { success: false, error: 'Missing Access Token' };
+    }
 
     try {
         const response = await fetch('https://api.line.me/v2/bot/message/push', {
@@ -83,10 +88,17 @@ async function sendMessage(to: string, text: string) {
                 messages: [{ type: 'text', text: text }],
             }),
         });
-        return response.ok;
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('LINE API Error:', errorData);
+            return { success: false, error: errorData };
+        }
+
+        return { success: true };
     } catch (e) {
         console.error('Failed to push message', e);
-        return false;
+        return { success: false, error: String(e) };
     }
 }
 
