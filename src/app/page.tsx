@@ -445,14 +445,14 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="p-3 bg-amber-50 rounded-xl border border-amber-100/50 text-amber-800 text-xs leading-relaxed space-y-2">
+              <div className="p-3 bg-blue-50 rounded-xl border border-blue-100/50 text-blue-800 text-xs leading-relaxed space-y-2">
                 <p className="flex items-start gap-2">
                   <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-                  <strong>Limits:</strong> Free tier service. Please test sparingly to avoid rate limits.
+                  <strong>Limits:</strong> Free tier service. Please test sparingly.
                 </p>
                 <p className="flex items-start gap-2">
-                  <AlertCircle size={14} className="mt-0.5 shrink-0" />
-                  <strong>Scheduler:</strong> Currently disabled on Vercel Free Tier (requires external cron). Use "Send Now".
+                  <CheckCircle size={14} className="mt-0.5 shrink-0 text-blue-600" />
+                  <strong>Scheduler:</strong> ACTIVE via <u>Cron-Job.org</u>. Configure endpoint with Auth.
                 </p>
               </div>
             </div>
