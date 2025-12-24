@@ -190,7 +190,7 @@ export default function Home() {
 
   const handleApplyAi = () => {
     setMessage(aiSuggestion);
-    setShowAiModal(false);
+    setAiSuggestion("");
     setFeedback("AI suggestion applied! ✨");
   };
 
