@@ -71,8 +71,9 @@ Ca6096c7ef8d43b7d9fc142fa479d2518
 
 ## ⚠️ Limitations & Notes
 
-- **Free Tier Limits**: This project uses free tiers for Vercel, Supabase, and Gemini. Please use sparingly to avoid hitting rate limits.
-- **Scheduler**: The background cron job for valid scheduling is **disabled** on this Vercel deployment due to free tier limitations. Please use the **"Send Now"** feature for immediate results.
+- **Free Tier Limits**: This project uses free tiers for Vercel, Supabase, and Gemini. Please use sparingly regarding API calls.
+- **Scheduler**: The automated scheduler is powered by **GitHub Actions** (running every 15 minutes).
+  - You must configure `CRON_SECRET` and `VERCEL_APP_URL` in your GitHub Repository Secrets for this to work.
 - **Deployment**: If deploying to Vercel, ensure you add all Environment Variables in the Project Settings.
 
 ## 📜 License
