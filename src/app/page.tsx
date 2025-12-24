@@ -22,6 +22,7 @@ export default function Home() {
   const [tone, setTone] = useState("Professional");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState("");
+  const [activeTab, setActiveTab] = useState<"upcoming" | "history">("upcoming");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [feedback, setFeedback] = useState("");
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -291,6 +292,30 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* AI Result Area (Split View) */}
+              {aiSuggestion && (
+                <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-teal-600 flex items-center gap-2 ml-1">
+                      <Sparkles size={14} /> AI Suggestion
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleApplyAi}
+                      className="text-xs font-bold bg-teal-100 text-teal-700 px-3 py-1.5 rounded-full hover:bg-teal-200 transition-colors flex items-center gap-1.5"
+                    >
+                      <Zap size={12} fill="currentColor" /> Use This
+                    </button>
+                  </div>
+                  <textarea
+                    value={aiSuggestion}
+                    readOnly
+                    rows={4}
+                    className="w-full pl-5 pr-4 py-4 bg-teal-50/50 border border-teal-200/60 rounded-2xl text-slate-600 focus:outline-none transition-all shadow-inner resize-none select-all"
+                  />
+                </div>
+              )}
+
               {/* Date & Time */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="group">
@@ -374,102 +399,108 @@ export default function Home() {
           </div>
         </section>
 
-        {/* RIGHT COLUMN: HISTORY (5/12 width) */}
+        {/* RIGHT COLUMN: LISTS (5/12 width) */}
         <section className="lg:col-span-5 flex flex-col gap-6">
           <header className="md:mt-0 mt-8 mb-2 flex items-center justify-between">
             <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-              <span className="bg-white p-2 rounded-xl shadow-sm text-teal-500"><History size={24} /></span> History
+              <span className="bg-white p-2 rounded-xl shadow-sm text-teal-500"><History size={24} /></span>
+              Activity
             </h2>
-            <div className="text-xs font-bold bg-slate-100 px-3 py-1.5 rounded-full text-slate-500">Live Updates</div>
           </header>
+
+          {/* TABS */}
+          <div className="bg-slate-200/50 p-1 rounded-xl flex gap-1">
+            <button
+              onClick={() => setActiveTab("upcoming")}
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${activeTab === "upcoming" ? "bg-white text-teal-600 shadow-sm" : "text-slate-500 hover:bg-slate-200/50"}`}
+            >
+              <Calendar size={14} /> Upcoming
+            </button>
+            <button
+              onClick={() => setActiveTab("history")}
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${activeTab === "history" ? "bg-white text-teal-600 shadow-sm" : "text-slate-500 hover:bg-slate-200/50"}`}
+            >
+              <History size={14} /> History
+            </button>
+          </div>
 
           <div className="flex-1 overflow-auto space-y-4 max-h-[800px] pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent pb-10">
             {loadingData ? (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400/50 gap-4">
                 <Loader2 className="animate-spin" size={40} />
-                <p className="text-sm font-medium">Loading schedules...</p>
-              </div>
-            ) : schedules.length === 0 ? (
-              <div className="text-center py-20 bg-white/40 backdrop-blur-sm rounded-[2rem] border-2 border-dashed border-slate-200">
-                <div className="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-teal-300 shadow-md">
-                  <Sparkles size={32} />
-                </div>
-                <h3 className="text-slate-800 font-bold text-lg mb-1">No broadcasts yet</h3>
-                <p className="text-slate-400 text-sm">Create your first message to see it here.</p>
+                <p className="text-sm font-medium">Loading...</p>
               </div>
             ) : (
-              schedules.map((item) => (
-                <div key={item.id} className={`group relative p-6 bg-white/70 backdrop-blur-md rounded-[1.5rem] border transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-teal-500/5 ${item.active ? 'border-teal-200 shadow-md' : 'border-slate-100 opacity-60 hover:opacity-100'}`}>
-                  <div className="flex justify-between items-start mb-3">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider py-1.5 px-3 rounded-full ${item.active ? 'bg-teal-100 text-teal-700' : 'bg-slate-100 text-slate-500'}`}>
-                      {item.active ? item.recurrence : 'SENT'}
-                    </span>
-                    <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md">
-                      <Clock size={12} /> {format(new Date(item.scheduledAt), "MMM d, HH:mm")}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-slate-800 line-clamp-1 mb-2 text-sm flex items-center gap-2">
-                    <Users size={14} className="text-teal-500" /> {item.targetId}
-                  </h3>
-                  <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100/50">
-                    <p className="text-slate-600 text-sm line-clamp-2 leading-relaxed">{item.message}</p>
-                  </div>
-
-                  {!item.active && (
-                    <div className="absolute top-6 right-6 text-teal-500/20 group-hover:text-teal-500 transition-colors">
-                      <CheckCircle size={24} />
+              <>
+                {activeTab === "upcoming" && (
+                  schedules.filter(s => s.active).length === 0 ? (
+                    <div className="text-center py-16 bg-white/40 backdrop-blur-sm rounded-[2rem] border-2 border-dashed border-slate-200">
+                      <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-teal-300 shadow-sm">
+                        <Calendar size={24} />
+                      </div>
+                      <p className="text-slate-400 text-sm font-medium">No active schedules.</p>
                     </div>
-                  )}
-                </div>
-              ))
+                  ) : (
+                    schedules.filter(s => s.active).map((item) => (
+                      <div key={item.id} className="group relative p-5 bg-white rounded-2xl border border-teal-100 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="text-[10px] font-bold uppercase tracking-wider py-1 px-2 rounded-md bg-teal-50 text-teal-600 border border-teal-100">
+                            {item.recurrence}
+                          </span>
+                          <span className="text-xs text-slate-400 font-mono flex items-center gap-1">
+                            <Clock size={12} /> {format(new Date(item.scheduledAt), "MMM d, HH:mm")}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-slate-800 line-clamp-1 mb-1 text-sm flex items-center gap-2">
+                          <Users size={14} className="text-teal-500" /> {item.targetId}
+                        </h3>
+                        <p className="text-slate-500 text-xs line-clamp-2 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
+                          {item.message}
+                        </p>
+                      </div>
+                    ))
+                  )
+                )}
+
+                {activeTab === "history" && (
+                  schedules.filter(s => !s.active).length === 0 ? (
+                    <div className="text-center py-16 bg-white/40 backdrop-blur-sm rounded-[2rem] border-2 border-dashed border-slate-200">
+                      <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 shadow-sm">
+                        <History size={24} />
+                      </div>
+                      <p className="text-slate-400 text-sm font-medium">No history yet.</p>
+                    </div>
+                  ) : (
+                    schedules.filter(s => !s.active).map((item) => (
+                      <div key={item.id} className="relative p-5 bg-slate-50/50 rounded-2xl border border-slate-200/60 opacity-80 hover:opacity-100 transition-all">
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="text-[10px] font-bold uppercase tracking-wider py-1 px-2 rounded-md bg-slate-200 text-slate-500">
+                            SENT
+                          </span>
+                          <span className="text-xs text-slate-400 font-mono flex items-center gap-1">
+                            {format(new Date(item.scheduledAt), "MMM d, HH:mm")}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-slate-700 line-clamp-1 mb-1 text-sm flex items-center gap-2">
+                          <Users size={14} className="text-slate-400" /> {item.targetId}
+                        </h3>
+                        <p className="text-slate-500 text-xs line-clamp-2 leading-relaxed italic">
+                          {item.message}
+                        </p>
+                        <div className="absolute top-4 right-4 text-teal-500">
+                          <CheckCircle size={16} />
+                        </div>
+                      </div>
+                    ))
+                  )
+                )}
+              </>
             )}
           </div>
         </section>
       </div>
 
-      {/* AI REVIEW MODAL */}
-      {showAiModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 ring-1 ring-white/50">
-            <div className="p-6 bg-gradient-to-r from-teal-500 to-cyan-600 flex justify-between items-center text-white">
-              <h3 className="font-bold text-lg flex items-center gap-2">
-                <Sparkles size={20} className="text-yellow-300" /> Review AI Suggestion
-              </h3>
-              <button onClick={() => setShowAiModal(false)} className="hover:bg-white/20 p-1 rounded-full transition-colors">
-                <X size={20} />
-              </button>
-            </div>
 
-            <div className="p-6 flex flex-col gap-4">
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-500">
-                Tone: <span className="font-bold text-teal-600 uppercase">{tone}</span>
-              </div>
-
-              <textarea
-                value={aiSuggestion}
-                onChange={(e) => setAiSuggestion(e.target.value)}
-                rows={6}
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-teal-400 focus:outline-none transition-all resize-none text-slate-700 leading-relaxed shadow-inner"
-              />
-
-              <div className="flex gap-3 justify-end mt-2">
-                <button
-                  onClick={() => setShowAiModal(false)}
-                  className="px-5 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleApplyAi}
-                  className="px-6 py-2.5 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-600 hover:shadow-lg hover:shadow-teal-500/20 active:scale-95 transition-all flex items-center gap-2"
-                >
-                  <CheckCircle size={18} /> Apply Change
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );
