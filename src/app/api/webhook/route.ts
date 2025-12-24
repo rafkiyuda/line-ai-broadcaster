@@ -14,3 +14,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ status: 'error' }, { status: 500 });
     }
 }
+
+// Add support for GET request to allow verification and browser visiting
+export async function GET(request: Request) {
+    return NextResponse.json({ status: 'ready', message: 'Webhook is active. Please use POST for LINE events.' }, { status: 200 });
+}
+
