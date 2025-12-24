@@ -4,12 +4,15 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function GET(request: Request) {
-    // In production, you should verify a CRON_SECRET header to ensure only Vercel works calls this.
-    // const authHeader = request.headers.get('authorization');
-    // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) { ... }
+    // Security Check
+    const authHeader = request.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     try {
         const now = new Date();
+        console.log(`[Cron] Server Time: ${now.toISOString()}`);
 
         // Find active schedules where scheduledAt is in the past
         // For recurring tasks, logic would need to update the next run time
@@ -52,10 +55,15 @@ export async function GET(request: Request) {
             }
         }
 
-        return NextResponse.json({ success: true, processed: results.length, results });
+        return NextResponse.json({
+            success: true,
+            serverTime: now.toISOString(),
+            processed: results.length,
+            results
+        });
     } catch (error) {
         console.error('Cron job error:', error);
-        return NextResponse.json({ error: 'Cron job failed' }, { status: 500 });
+        return NextResponse.json({ error: 'Cron job failed', details: String(error) }, { status: 500 });
     }
 }
 
